@@ -1,10 +1,11 @@
 -- Room Combine Switcher
 -- By Joshua Cerecke
--- Ceretech Audiovisual Solutions
--- joshua@ceretech.co.nz
+-- White Label AV
+-- joshua@whitelabelav.co.nz
 -- +64 27 2373 253
 -- September 2018
 -- button disable, sync option and auto switch additions by James Martin, QSC
+
 PluginInfo = {
     Name = "Room Combiner Add-ons~Room Combine Switcher",
     Version = "0.98",
@@ -681,11 +682,10 @@ if Controls then
 
       -- for each room in the group
       for _, room in ipairs(groupMembers) do
-          print(room)
+          -- print(room)
           for input = 1, Properties['Inputs'].Value do
-              Controls["Room " .. room .. " Input"][input].IsDisabled = true
+              Controls["Room " .. room .. " Input"][input].IsInvisible = true
           end
-          print('Disabled all')
 
           -- look at room validInputs and add to group validInputs
           for _, input in ipairs(rooms[room]["validInputs"]) do
@@ -700,7 +700,7 @@ if Controls then
       
       for _, room in ipairs(groupMembers) do
           for _, input in ipairs(groupValidInputs) do
-              Controls["Room " .. room .. " Input"][input].IsDisabled = false
+              Controls["Room " .. room .. " Input"][input].IsInvisible = false
               print('Enable:', room, input)
           end
       end
