@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Room Combine Switcher — Q-SYS Plugin Help</title>
+<style>
+  :root {
+    --charcoal: #2E3033;
+    --slate: #6B6F76;
+    --hairline: #D2D5D9;
+    --oxblood: #7A2E2E;
+    --surface: #FFFFFF;
+    --wash: #F6F7F8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: Roboto, "Segoe UI", Arial, sans-serif;
+    color: var(--charcoal);
+    background: var(--surface);
+    line-height: 1.55;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+    max-width: 980px;
+  }
+  header.brand {
+    border-bottom: 3px solid var(--charcoal);
+    padding-bottom: 18px;
+    margin-bottom: 28px;
+  }
+  header.brand h1 { margin: 0 0 4px; font-size: 26px; font-weight: 500; }
+  header.brand .meta { color: var(--slate); font-size: 13px; }
+  header.brand .meta a { color: var(--oxblood); text-decoration: none; }
+  h2 {
+    font-size: 19px; font-weight: 500; margin: 34px 0 10px;
+    padding-bottom: 6px; border-bottom: 1px solid var(--hairline);
+  }
+  h3 { font-size: 15px; font-weight: 500; margin: 22px 0 8px; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0 18px; font-size: 13px; }
+  th, td { border: 1px solid var(--hairline); padding: 7px 9px; text-align: left; vertical-align: top; }
+  th { background: var(--wash); font-weight: 500; }
+  code { font-family: Consolas, "Courier New", monospace; font-size: 12.5px; background: var(--wash); padding: 1px 4px; border-radius: 2px; }
+  .note { border-left: 3px solid var(--oxblood); background: var(--wash); padding: 10px 14px; margin: 14px 0; font-size: 14px; }
+  .note strong { color: var(--oxblood); }
+  .scroll { overflow-x: auto; }
+  ul { margin: 8px 0 8px 20px; padding: 0; }
+  li { margin-bottom: 5px; }
+  footer { margin-top: 48px; padding-top: 14px; border-top: 1px solid var(--hairline); color: var(--slate); font-size: 12px; }
+  footer a { color: var(--oxblood); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<header class="brand">
+  <h1>Room Combine Switcher</h1>
+  <div class="meta">
+    Plugin version <strong>1.0.0.0</strong> &middot; this document written for 1.0.0.0<br>
+    White Label AV &middot; Joshua Cerecke &middot;
+    <a href="https://whitelabelav.co.nz">whitelabelav.co.nz</a> &middot;
+    <a href="mailto:joshua@whitelabelav.co.nz">joshua@whitelabelav.co.nz</a>
+  </div>
+</header>
+
+<h2>Description</h2>
+<p>
+  Room Combine Switcher mirrors the behaviour of the stock Q-SYS
+  <strong>Room Combiner</strong> component, but instead of mixing audio it
+  synchronises <em>switchers</em>. Rooms are joined and separated by walls using
+  the same wall/room association model. When rooms are combined their switcher
+  selections follow one another; when separated, each room runs independently
+  again.
+</p>
+<p>
+  It adds <strong>input restriction</strong>: each room can be limited to a
+  subset of the switcher's inputs. When rooms are combined, the group's allowed
+  inputs are the <em>union</em> of its members' — so combining grants each room
+  access to the others' sources, and separating returns each room to its own
+  list. Buttons for inputs a room may not reach are made invisible.
+</p>
+<p>
+  The plugin drives no hardware directly. It exposes control pins that are wired
+  to whatever performs the actual switching — a video matrix plugin, a router
+  component, a Control Script, or logic elsewhere in the design.
+</p>
+
+<h2>Important notes</h2>
+<div class="note">
+  <strong>Known defect — Allow mode with an empty input list.</strong>
+  Setting a room's <code>Restrict Mode</code> to <code>Allow</code> while its
+  <code>Restrict Inputs</code> box is still empty leaves the room with no valid
+  inputs and raises a runtime error. <strong>Enter the allowed inputs first,
+  then change the mode.</strong> The same fault occurs in <code>Restrict</code>
+  mode if every input is excluded. Present since 0.98.
+</div>
+<ul>
+  <li>
+    <strong>Minimum Q-SYS Designer version:</strong> 9.0. The plugin uses no
+    libraries beyond the core Lua API. Developed against QDS 10.1.1.
+  </li>
+  <li>
+    <strong>No embedded components.</strong> The plugin embeds no mixers,
+    players or gain stages, so it consumes none of the design's channel budget.
+    Multiple instances carry no shared resource cost.
+  </li>
+  <li>
+    <strong>No instance limit</strong>, but see the execution-limit note below —
+    every plugin, Control Script and Block Controller in a design shares one
+    thread at 30&nbsp;fps.
+  </li>
+  <li>
+    <strong>Execution limit.</strong> The room-combine algorithm can exceed the
+    Q-SYS script execution limit when the number of rooms, walls or room/wall
+    associations gets large. Event-handler registration is already chunked
+    across ticks (32 rooms per tick) to mitigate this at startup.
+  </li>
+  <li>
+    <strong>Changing <code>Rooms</code>, <code>Walls</code> or <code>Inputs</code>
+    resizes every control array</strong> and will break existing wiring to the
+    pins that disappear. Set these before wiring.
+  </li>
+  <li>
+    <strong>A range entirely above the room count</strong> (e.g. <code>9-99</code>
+    with 8 rooms) echoes an inverted string such as <code>9-8</code>. The parsed
+    selection is correctly empty; only the displayed text is wrong.
+  </li>
+</ul>
+
+<h2>Setup and configuration</h2>
+<ol>
+  <li>Place the plugin from <strong>Schematic Elements &rarr; White Label AV
+    &rarr; Room Combine Switcher</strong>.</li>
+  <li>In the Properties pane set <code>Rooms</code>, <code>Walls</code> and
+    <code>Inputs</code> to match the installation. These size every control
+    array, so set them before wiring anything.</li>
+  <li>Turn on <code>Input Restriction</code> if rooms need to be limited to a
+    subset of inputs. This reveals the per-room Mode and Inputs panel.</li>
+  <li>Wire the <code>Room N Input</code> pins to whatever performs the switching,
+    and wire the switcher's active-source feedback back into
+    <code>Input Active</code> if you intend to use Auto switch.</li>
+  <li>For each wall, type the rooms it joins into that wall's
+    <strong>Rooms</strong> box. Lists and ranges both work —
+    <code>1-4, 7</code>. Opening the wall combines everything associated with it.</li>
+  <li>Optionally populate <code>Input Name</code> so the per-room
+    <strong>Select by Name</strong> combo boxes are meaningful.</li>
+</ol>
+<p>
+  No device settings, API keys, physical connections or network configuration are
+  required — the plugin talks to nothing outside the design.
+</p>
+
+<h2>Properties</h2>
+<div class="scroll">
+<table>
+  <thead>
+    <tr><th>Name</th><th>Type</th><th>Default</th><th>Accepted values</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Rooms</td><td>integer</td><td>2</td><td>2–256</td>
+        <td>Number of rooms managed. Sizes the Room Select, Room LED, Select Name, Restrict Mode and Restrict Inputs arrays, and creates one <code>Room N Input</code> array per room.</td></tr>
+    <tr><td>Walls</td><td>integer</td><td>1</td><td>1–256</td>
+        <td>Number of walls that can join rooms. Sizes the Wall Rooms and Wall Opens arrays.</td></tr>
+    <tr><td>Inputs</td><td>integer</td><td>2</td><td>1–128</td>
+        <td>Number of switcher inputs. Sizes Input Active, Input Name and every per-room input array.</td></tr>
+    <tr><td>Input Restriction</td><td>boolean</td><td>false</td><td>true / false</td>
+        <td>Shows the per-room restriction panel. When false, all inputs are valid for every room and the Restrict controls are hidden (but retain their saved values).</td></tr>
+    <tr><td>Use Custom Colours</td><td>boolean</td><td>false</td><td>true / false</td>
+        <td>Use <em>Custom Colours CSV</em> instead of the built-in LED colours.</td></tr>
+    <tr><td>Custom Colours CSV</td><td>string</td><td><em>empty</em></td>
+        <td><code>#RGB</code>, <code>#RRGGBB</code>, CSS colour names, or HSV as <code>!HHSSVV</code></td>
+        <td>Comma-separated, no spaces or quotes — e.g. <code>Red,LimeGreen,Cyan,#7C0000</code>. The <strong>last</strong> entry is the OFF colour; the preceding entries cycle across combined groups. Only read when <em>Use Custom Colours</em> is true.</td></tr>
+    <tr><td>Allow Toggle Off</td><td>boolean</td><td>false</td><td>true / false</td>
+        <td>Lets an input that is currently on be toggled back off. With <code>Inputs = 1</code> this turns the plugin into a toggle-room-combiner, synchronising a toggle state across combined rooms.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>Controls</h2>
+<p>
+  <code>R</code> = the <em>Rooms</em> property, <code>W</code> = <em>Walls</em>,
+  <code>I</code> = <em>Inputs</em>. An array of count <em>N</em> exposes pins
+  named <code>Name 1</code>&hellip;<code>Name N</code>; when the count is 1 the
+  pin takes the bare name.
+</p>
+<div class="scroll">
+<table>
+  <thead>
+    <tr><th>Control</th><th>Type</th><th>Count</th><th>Default</th><th>Range</th><th>Pin name</th><th>Pin direction</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Link</td><td>Toggle Button</td><td>1</td><td>off</td><td>0–1</td><td>Link</td><td>Both</td>
+        <td>When on, a switch request moves the whole group. When off, only the room that was touched switches.</td></tr>
+    <tr><td>Auto</td><td>Toggle Button</td><td>1</td><td>off</td><td>0–1</td><td>Auto</td><td>Both</td>
+        <td>Enables auto switching — the group follows the most recently activated input reported on <code>Input Active</code>, after a 0.5&nbsp;s delay.</td></tr>
+    <tr><td>Wall Rooms</td><td>Text Entry</td><td>W</td><td><em>empty</em></td><td>room numbers, lists and ranges</td><td>Wall Rooms&nbsp;<em>w</em></td><td>Both</td>
+        <td>Which rooms this wall joins, e.g. <code>1-4, 7</code>. Sanitised and written back on entry.</td></tr>
+    <tr><td>Wall Opens</td><td>Toggle Button</td><td>W</td><td>off</td><td>0–1</td><td>Wall Opens&nbsp;<em>w</em></td><td>Both</td>
+        <td>Wall open (on) combines the associated rooms; closed separates them.</td></tr>
+    <tr><td>Room Select</td><td>Text Entry</td><td>R</td><td>1</td><td>1–I</td><td>Room Select&nbsp;<em>r</em></td><td>Both</td>
+        <td>The room's current input, by number. Writable — setting it requests a switch.</td></tr>
+    <tr><td>Select Name</td><td>Combo Box</td><td>R</td><td><em>empty</em></td><td>current valid input names</td><td>Select Name&nbsp;<em>r</em></td><td>Both</td>
+        <td>The room's current input, by name. Choices are repopulated from <code>Input Name</code> as the group's valid inputs change.</td></tr>
+    <tr><td>Room LED</td><td>LED Indicator</td><td>R</td><td>off</td><td>0–1</td><td><em>none</em></td><td>—</td>
+        <td>Lit when the room is combined with at least one other. Colour identifies the group. Panel indicator only — no pin.</td></tr>
+    <tr><td>Room <em>r</em> Input</td><td>Toggle Button</td><td>I <em>(per room)</em></td><td>input 1 on</td><td>0–1</td><td>Room&nbsp;<em>r</em>&nbsp;Input&nbsp;<em>i</em></td><td>Both</td>
+        <td>Radio-style input selection for room <em>r</em>. One array exists per room. Buttons for inputs the room may not reach are made invisible.</td></tr>
+    <tr><td>Input Active</td><td>LED Indicator</td><td>I</td><td>off</td><td>0–1</td><td>Input Active&nbsp;<em>i</em></td><td>Both</td>
+        <td><strong>Input</strong> to the plugin: drive this from the source's own presence/active detection. Feeds the Auto switch history.</td></tr>
+    <tr><td>Input Name</td><td>Text Entry</td><td>I</td><td><em>empty</em></td><td>free text</td><td>Input Name&nbsp;<em>i</em></td><td>Both</td>
+        <td>Display name for each input. Populates the Select Name combo boxes.</td></tr>
+    <tr><td>Restrict Mode</td><td>Combo Box</td><td>R</td><td>Bypass</td><td>Bypass / Restrict / Allow</td><td><em>none</em></td><td>—</td>
+        <td><code>Bypass</code>: all inputs valid. <code>Allow</code>: only those listed in Restrict Inputs. <code>Restrict</code>: all <em>except</em> those listed. Hidden unless <em>Input Restriction</em> is on.</td></tr>
+    <tr><td>Restrict Inputs</td><td>Text Entry</td><td>R</td><td><em>empty</em></td><td>input numbers, lists and ranges</td><td><em>none</em></td><td>—</td>
+        <td>The input list the mode above acts on, e.g. <code>1-3, 6</code>. Sanitised and written back on entry. Hidden unless <em>Input Restriction</em> is on.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>How combining works</h2>
+<ul>
+  <li>Every room belongs to a group, even when alone in one. A group is named
+    after its <strong>lowest room number</strong>, which keeps group identity
+    stable regardless of the order walls were opened.</li>
+  <li>Walls are edges and rooms are nodes. Opening a wall joins every room
+    associated with it; the plugin walks the resulting graph to find each
+    connected set of rooms.</li>
+  <li>Switching happens <strong>by group</strong>, not by room — provided
+    <code>Link</code> is on.</li>
+  <li>A group's valid inputs are the union of its members'. If the group's
+    current input falls outside that set, the group is moved to the first valid
+    input.</li>
+</ul>
+
+<h2>Verification status</h2>
+<p>
+  Version 1.0.0.0 was verified host-side under the <code>qsys-dev</code> test
+  harness (Lua 5.3): design-time control and layout output was compared against
+  0.98 across six property configurations and matched exactly apart from the
+  intended 90&nbsp;px brand-header offset, and runtime combining, linking,
+  restriction and range parsing were exercised directly.
+</p>
+<p>
+  <strong>Verification in Q-SYS Designer against real hardware is still
+  outstanding for this release.</strong> No controlled device firmware applies —
+  the plugin drives no hardware itself.
+</p>
+
+<h2>Release notes</h2>
+
+<h3>1.0.0.0</h3>
+<p>
+  First release under the White Label AV brand. Restructure, rebrand and
+  documentation pass — no functional change to switching, combining or input
+  restriction.
+</p>
+<ul>
+  <li>Added the shared White Label AV brand header to the control panel.</li>
+  <li>Source split from a single 1272-line <code>.qplug</code> into <code>src/</code>,
+    assembled by PLUGCC <code>#include</code> directives.</li>
+  <li>Plugin moved to <strong>White Label AV</strong> in the Schematic Elements
+    tree; <code>PluginInfo</code> completed with the fields the Verification
+    Rubric requires; version now printed to the debug log at start-up.</li>
+  <li>Added this help document and a changelog.</li>
+  <li>Fixed: <code>Restrict Mode</code> and <code>Restrict Inputs</code> had no
+    layout entry when <em>Input Restriction</em> was off, leaving them unplaced.</li>
+  <li>Removed the hidden 1&times;1 <code>code</code> control, a development
+    leftover that was never read. <strong>This removes a user pin.</strong></li>
+  <li><code>PluginInfo.Id</code> lost its <code>-compare</code> development
+    suffix. <strong>Designs placed with a <code>-compare</code> build must have
+    the component re-placed.</strong></li>
+</ul>
+
+<h3>0.98 and earlier</h3>
+<ul>
+  <li>Per-room input restriction with Bypass / Allow / Restrict modes; combined
+    rooms pool their allowed inputs.</li>
+  <li>User-definable LED colours via a comma-separated property.</li>
+  <li><em>Allow toggle off</em> property, enabling single-input
+    toggle-combiner use.</li>
+  <li>Auto switch, following the most recently activated input per group.</li>
+  <li>Select-by-name combo boxes alongside the numeric selectors.</li>
+  <li>Button disable, sync option and auto switch additions by James Martin, QSC.</li>
+</ul>
+
+<footer>
+  Room Combine Switcher &middot; &copy; White Label AV &middot;
+  <a href="https://whitelabelav.co.nz">whitelabelav.co.nz</a><br>
+  Source and issues:
+  <a href="https://github.com/jcerecke/Switcher-Room-Combiner">github.com/jcerecke/Switcher-Room-Combiner</a>
+</footer>
+
+</body>
+</html>
