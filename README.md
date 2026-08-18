@@ -67,6 +67,7 @@ Set these in the Properties pane before wiring anything — `Rooms`, `Walls` and
 | Use Custom Colours | boolean | false | — | Use the CSV below instead of the built-in LED colours |
 | Custom Colours CSV | string | *(empty)* | — | Comma-separated colours, last one is the OFF colour |
 | Allow Toggle Off | boolean | false | — | Lets an active input be toggled back off |
+| Debug Print | enum | None | None / Function Calls / All | Debug verbosity. `Function Calls` traces switching and grouping; `All` adds the resolved input lists |
 
 Associate rooms with a wall by typing room numbers into that wall's **Rooms**
 box — ranges and lists both work, e.g. `1-4, 7`. Opening the wall combines
@@ -77,12 +78,14 @@ which is also what F1 opens in Designer.
 
 ## Known issues
 
-- **Selecting `Allow` restriction mode before entering any inputs crashes the
-  plugin.** Type the allowed inputs into **Restrict Inputs** *first*, then
-  change **Restrict Mode**. The same fault occurs in `Restrict` mode if every
-  input is excluded. See [CHANGELOG.md](CHANGELOG.md).
 - A wall/room range entirely above the room count (e.g. `9-99` with 8 rooms)
   echoes an inverted string like `9-8`. The selection itself is correctly empty.
+- A room left with **no** valid inputs — `Allow` mode with an empty list, or
+  `Restrict` mode excluding everything — deselects and stays deselected. When
+  inputs are made available again the buttons reappear but the room is not
+  auto-selected; click an input to bring it back. This is deliberate: a nil
+  current input is a legitimate "off" state that the plugin does not override,
+  which is also what makes *Allow toggle off* work.
 - The room-combine algorithm can hit the Q-SYS script execution limit when the
   number of rooms, walls or associations gets large.
 
@@ -127,7 +130,7 @@ python3 scripts/qsys_lint.py src/plugin.lua
 
 ### Outstanding rubric gaps
 
-The linter reports four warnings, none of which block use:
+The linter reports three warnings, none of which block use:
 
 - **QP009 ×2** — the plugin sets `.Color` on the room LEDs at runtime. This is
   the custom-colour feature; the stock Room Combiner does the same. Rubric §8
@@ -135,12 +138,11 @@ The linter reports four warnings, none of which block use:
   submission.
 - **QP035** — no `Status` indicator. Rubric §1 requires one of *device* plugins;
   this is a control plugin with no device to report on.
-- **QP036** — no `Debug Print` property. Rubric §6 requires one. The runtime
-  currently calls `print()` unconditionally, which is noisy on a large design.
+
+Both also block `release.py`, which lints `--strict` with no waiver flag.
 
 ## Roadmap
 
-- Gate the debug output behind a standard `Debug Print` property.
 - Optimise `findRoomGroups()` so more rooms fit inside the execution limit.
 - Algorithmically generate a distinct colour per room LED — `defaultH_Values` in
   `src/runtime/init.lua` already holds 256 evenly-spread HSV hues for this.

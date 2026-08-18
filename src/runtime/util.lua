@@ -23,6 +23,29 @@
     end
   end
 
+  ----------------------------------------------------------------------------
+  -- Debug output, gated by the "Debug Print" property.
+  --
+  -- These functions run on every switch and every combine, in a design that may
+  -- have hundreds of rooms, so printing unconditionally floods the debug window
+  -- and costs time on the shared 30 fps thread. Default is None.
+  ----------------------------------------------------------------------------
+
+  DebugFunction, DebugState = false, false
+
+  function SetupDebugPrint()
+    local d = Properties["Debug Print"].Value
+    if d == "Function Calls" then
+      DebugFunction = true
+    elseif d == "All" then
+      DebugFunction, DebugState = true, true
+    end
+  end
+  SetupDebugPrint()
+
+  function dbgFn(...) if DebugFunction then print(...) end end
+  function dbgState(...) if DebugState then print(...) end end
+
   function split(source, delimiters)
     local elements = {}
     local pattern = '([^' .. delimiters .. ']+)'
@@ -42,7 +65,10 @@
     end
   end
 
+  -- Called on every valid-input recalculation, so it is state-gated and builds
+  -- no string at all unless "All" is selected.
   function printtable(prefix, t)
+    if not DebugState then return end
     local x = ""
     for i, v in ipairs(t) do x = x .. tostring(v) .. "\t" end
     print(prefix, x)

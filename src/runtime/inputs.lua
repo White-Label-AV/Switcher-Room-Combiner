@@ -9,7 +9,7 @@
   ----------------------------------------------------------------------------
 
   function groupInputSync(group)
-    print("function start", "groupInputSync", group)
+    dbgFn("function start", "groupInputSync", group)
     local masterRoomInput = rooms[group]["currentInput"]
     local groupValidInputs = groups[group]["validInputs"]
 
@@ -32,9 +32,9 @@
   end
 
   function updateRoomValidInputs(room)
-    print("function start", "updateRoomValidInputs", room)
+    dbgFn("function start", "updateRoomValidInputs", room)
     local mode = rooms[room]["restrictionMode"]
-    print("the restriction mode is " .. mode)
+    dbgState("the restriction mode is " .. mode)
 
     local totalInputs = Properties["Inputs"].Value
     local roomRestrictionInputs = rooms[room]["restrictionInputs"]
@@ -67,7 +67,7 @@
   end
 
   function updateGroupValidInputs(group)
-    print("function start", "updateGroupValidInputs", group)
+    dbgFn("function start", "updateGroupValidInputs", group)
     local groupMembers = groups[group]["members"]
     local totalInputs = Properties['Inputs'].Value
 
@@ -107,7 +107,7 @@
   end
 
   function UpdateComboChoices(group)
-    print('function start UpdateComboChoices', group)
+    dbgFn('function start UpdateComboChoices', group)
     local groupValidInputs = groups[group]["validInputs"]
     local groupMembers = groups[group]["members"]
 
@@ -129,8 +129,12 @@
     end
   end
 
+  -- Tolerates nil and out-of-range indices: a room with no valid input has no
+  -- number to look up, and UpdateComboString reaches here via tonumber() on a
+  -- text box that may be empty. Returns "" rather than indexing nil.
   function InputNameFromNumber(n)
-    return Controls['Input Name'][n].String
+    local ctrl = n and Controls['Input Name'][n]
+    return ctrl and ctrl.String or ""
   end
 
   function UpdateComboString(group)

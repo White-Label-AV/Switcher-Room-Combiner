@@ -8,7 +8,7 @@
 
   function userSwitch(input, room, state)
     input, room = tonumber(input), tonumber(room)
-    print("function start", "userSwitch", input, room, state)
+    dbgFn("function start", "userSwitch", input, room, state)
     -- user has requested to switch inputs
 
     local group = rooms[room]["group"]
@@ -67,7 +67,7 @@
   end
 
   function userWallRoomsChange(wall, roomsTextBox)
-    print("function start", "userWallRoomsChange", wall, roomsTextBox)
+    dbgFn("function start", "userWallRoomsChange", wall, roomsTextBox)
 
     local roomQty = Properties["Rooms"].Value
 

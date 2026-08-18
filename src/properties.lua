@@ -10,7 +10,17 @@ function GetProperties()
     {Name = "Input Restriction", Type = "boolean", Value = false},
     {Name = "Use Custom Colours", Type = "boolean", Value = false},
     {Name = "Custom Colours CSV", Type = "string"},
-    {Name = "Allow Toggle Off", Type = "boolean", Value = false}
+    {Name = "Allow Toggle Off", Type = "boolean", Value = false},
+    -- The standard debug enum, minus the Tx/Rx choices: this plugin drives no
+    -- device and has no wire traffic, so offering them would be a dead option.
+    -- "Function Calls" traces entry into the switching and grouping functions;
+    -- "All" adds the resolved room/group input lists.
+    {
+      Name = "Debug Print",
+      Type = "enum",
+      Choices = {"None", "Function Calls", "All"},
+      Value = "None"
+    }
   }
   return props
 end

@@ -85,12 +85,16 @@
 
 <h2>Important notes</h2>
 <div class="note">
-  <strong>Known defect — Allow mode with an empty input list.</strong>
-  Setting a room's <code>Restrict Mode</code> to <code>Allow</code> while its
-  <code>Restrict Inputs</code> box is still empty leaves the room with no valid
-  inputs and raises a runtime error. <strong>Enter the allowed inputs first,
-  then change the mode.</strong> The same fault occurs in <code>Restrict</code>
-  mode if every input is excluded. Present since 0.98.
+  <strong>A room with no valid inputs deselects, and stays deselected.</strong>
+  Setting <code>Restrict Mode</code> to <code>Allow</code> with an empty
+  <code>Restrict Inputs</code> box — or <code>Restrict</code> excluding
+  everything — leaves the room with nothing it may select, so every button goes
+  off and both text boxes clear. When inputs are made available again the
+  buttons reappear but the room is <em>not</em> auto-selected; click an input to
+  bring it back. This is deliberate: a room on no input is a legitimate state,
+  and it is what makes <em>Allow toggle off</em> work.
+  <br><br>
+  Before 1.0.0.0 this combination raised a runtime error instead.
 </div>
 <ul>
   <li>
@@ -170,6 +174,8 @@
         <td>Comma-separated, no spaces or quotes — e.g. <code>Red,LimeGreen,Cyan,#7C0000</code>. The <strong>last</strong> entry is the OFF colour; the preceding entries cycle across combined groups. Only read when <em>Use Custom Colours</em> is true.</td></tr>
     <tr><td>Allow Toggle Off</td><td>boolean</td><td>false</td><td>true / false</td>
         <td>Lets an input that is currently on be toggled back off. With <code>Inputs = 1</code> this turns the plugin into a toggle-room-combiner, synchronising a toggle state across combined rooms.</td></tr>
+    <tr><td>Debug Print</td><td>enum</td><td>None</td><td>None / Function Calls / All</td>
+        <td>Debug verbosity, printed to the plugin's debug window. <code>Function Calls</code> traces entry into the switching and grouping functions; <code>All</code> additionally dumps each room's and group's resolved valid-input list. The plugin version is printed at start-up regardless. Leave at <code>None</code> in production — these functions run on every switch and every combine.</td></tr>
   </tbody>
 </table>
 </div>
@@ -260,6 +266,13 @@
     tree; <code>PluginInfo</code> completed with the fields the Verification
     Rubric requires; version now printed to the debug log at start-up.</li>
   <li>Added this help document and a changelog.</li>
+  <li>Added the <code>Debug Print</code> property. Every automatic
+    <code>print()</code> in the runtime is now gated behind it and defaults to
+    silent; previously they all ran unconditionally.</li>
+  <li><strong>Fixed a runtime error</strong> when a room was left with no valid
+    inputs — <code>Allow</code> mode with an empty list, or <code>Restrict</code>
+    excluding everything. A nil input is now handled as a real state rather than
+    dereferenced. Present since 0.98.</li>
   <li>Fixed: <code>Restrict Mode</code> and <code>Restrict Inputs</code> had no
     layout entry when <em>Input Restriction</em> was off, leaving them unplaced.</li>
   <li>Removed the hidden 1&times;1 <code>code</code> control, a development
