@@ -8,8 +8,9 @@
 
 PluginInfo = {
     Name = "Room Combiner Add-ons~Room Combine Switcher",
-    Version = "0.98",
-    Id = "d2702557-f548-48bb-858d-d7c43f0ce5ee",
+    Version = "0.0.0.101",
+    BuildVersion = "0.0.0.101",
+    Id = "d2702557-f548-48bb-858d-d7c43f0ce5ee-compare",
     Description = "Multi-room switcher that can be used for auxiliary switching in room combine installations",
     ShowDebug = true
 }
@@ -647,23 +648,20 @@ if Controls then
       -- start building new validInputs table from scratch
       local roomValidInputs = {}
 
-      if mode == bypass then -- add all available inputs to allowed list.
+      if mode == bypass then
           for input = 1, totalInputs do
               table.insert(roomValidInputs, input)
           end
-      else -- read restricted inputs
-
-          if mode == allow then -- and add only those in the inputs box to the allowed list.
-              for _, input in ipairs(roomRestrictionInputs) do
-                  if input > 0 and input <= totalInputs then -- if valid input
-                      table.insert(roomValidInputs, input)
-                  end
+      elseif mode == allow then
+          for _, input in ipairs(roomRestrictionInputs) do
+              if input > 0 and input <= totalInputs then
+                  table.insert(roomValidInputs, input)
               end
-          elseif mode == restrict then -- add all inputs except those in the inputs box to the allowed list.
-              for input = 1, totalInputs do
-                  if not tablefind(roomRestrictionInputs, input) then
-                      table.insert(roomValidInputs, input)
-                  end
+          end
+      elseif mode == restrict then
+          for input = 1, totalInputs do
+              if not tablefind(roomRestrictionInputs, input) then
+                  table.insert(roomValidInputs, input)
               end
           end
       end
@@ -676,43 +674,42 @@ if Controls then
 
   function updateGroupValidInputs(group)
       print("function start", "updateGroupValidInputs", group)
-      -- start with a blank table
-      local groupValidInputs = {}
       local groupMembers = groups[group]["members"]
+      local totalInputs = Properties['Inputs'].Value
 
-      -- for each room in the group
+      if not Properties["Input Restriction"].Value then
+          -- Bypass: all inputs valid, no IsInvisible writes needed.
+          groups[group]["validInputs"] = allInputs
+          groupInputSync(group)
+          UpdateComboChoices(group)
+          return
+      end
+
+      -- Restricted: union each room's validInputs via a set (O(R×I)) then
+      -- read out in order 1..max to get a sorted result without table.sort.
+      local unionSet = {}
       for _, room in ipairs(groupMembers) do
-          -- print(room)
-          for input = 1, Properties['Inputs'].Value do
-              Controls["Room " .. room .. " Input"][input].IsInvisible = true
-          end
-
-          -- look at room validInputs and add to group validInputs
           for _, input in ipairs(rooms[room]["validInputs"]) do
-              if not tablefind(groupValidInputs, input) then
-                  table.insert(groupValidInputs, input)
-              end
-          end 
-      end
-      table.sort(groupValidInputs)
-
-      -- update Controls
-      
-      for _, room in ipairs(groupMembers) do
-          for _, input in ipairs(groupValidInputs) do
-              Controls["Room " .. room .. " Input"][input].IsInvisible = false
-              print('Enable:', room, input)
+              unionSet[input] = true
           end
       end
+      local groupValidInputs = {}
+      for input = 1, totalInputs do
+          if unionSet[input] then table.insert(groupValidInputs, input) end
+      end
 
-      
+      -- Single-pass IsInvisible update using the set built above.
+      for _, room in ipairs(groupMembers) do
+          local roomInputCtrl = Controls["Room " .. room .. " Input"]
+          for input = 1, totalInputs do
+              roomInputCtrl[input].IsInvisible = not unionSet[input]
+          end
+      end
 
       groups[group]["validInputs"] = groupValidInputs
       printtable("function end\tupdateGroupValidInputs", groupValidInputs)
-      -- now that the valid inputs have been updated, let's check the group's current inputs for validity
       groupInputSync(group)
       UpdateComboChoices(group)
-      
   end
 
   function UpdateComboChoices(group)
@@ -720,18 +717,16 @@ if Controls then
       local groupValidInputs = groups[group]["validInputs"]
       local groupMembers = groups[group]["members"]
 
+      -- build choices once; all rooms in a group share the same valid input list
+      local choices = {}
+      for _, input in ipairs(groupValidInputs) do
+          table.insert(choices, Controls['Input Name'][input].String)
+      end
       for _, room in ipairs(groupMembers) do
-        -- print('\t'..room)
-            local choices = {}
-            for _, input in ipairs(groupValidInputs) do
-            -- print('\t\t'..input)
-                table.insert(choices, Controls['Input Name'][input].String)
-            end
-            Controls['Select Name'][room].Choices = choices
+          Controls['Select Name'][room].Choices = choices
       end
 
       UpdateComboString(group)
-
   end
 
   function InputNumberfromName(name)
@@ -765,10 +760,9 @@ if Controls then
           -- for each input button for the room
           for i, v in ipairs(Controls["Room " .. room .. " Input"]) do
               v.Value = i == input and 1 or 0
-              switchNames(room, input)
           end
       else
-          Controls["Room " .. room .. " Input"][input].Value = state 
+          Controls["Room " .. room .. " Input"][input].Value = state
       end
       -- update global variable and text
       rooms[room]["currentInput"] = state and input or nil
@@ -796,29 +790,19 @@ if Controls then
           -- remove any crap at the start plus the matchRange
           local removeRange = "[^%d]*" .. matchRange
 
-          while (strToParse:match(matchRange)) do
-
-              local rangeA, rangeB = strToParse:match(matchRange)
-              rangeA, rangeB = tonumber(rangeA), tonumber(rangeB)
-
-              -- build the string to return
-
-              -- math.min/max used in case someone entered a range with decending digits and to keep range inside 1 to max.
+          local mA, mB = strToParse:match(matchRange)
+          while mA do
+              local rangeA, rangeB = tonumber(mA), tonumber(mB)
+              -- math.min/max handles descending ranges and clamps to 1..max
               local rangeMin = math.max(1, math.min(rangeA, rangeB))
               local rangeMax = math.min(max, math.max(rangeA, rangeB))
-              -- sanitise string output
-              s = s == "" and s .. tostring(rangeMin) .. "-" ..
-                      tostring(rangeMax) or s .. ", " .. tostring(rangeMin) ..
-                      "-" .. tostring(rangeMax)
-
-              -- add each digit to the table
+              s = s == "" and tostring(rangeMin) .. "-" .. tostring(rangeMax)
+                           or s .. ", " .. tostring(rangeMin) .. "-" .. tostring(rangeMax)
               for digit = rangeMin, rangeMax do
                   if digit > 0 then table.insert(t, digit) end
               end
-
-              -- remove the parsed part of the string
               strToParse = strToParse:gsub(removeRange, "", 1)
-
+              mA, mB = strToParse:match(matchRange)
           end
       end
       return t, s, strToParse
@@ -833,20 +817,15 @@ if Controls then
           -- remove any crap on either side of the digit
           local removeDigit = "[^%d]*" .. matchDigit .. "[^%d]*"
 
-          while (strToParse:match(matchDigit)) do
-              local digit = tonumber(strToParse:match(matchDigit))
-
+          local m = strToParse:match(matchDigit)
+          while m do
+              local digit = tonumber(m)
               if digit > 0 and digit <= max then
-                  -- add each digit to the table
                   table.insert(t, digit)
-
-                  -- build the string
-                  s = s == "" and s .. strToParse:match(matchDigit) or s ..
-                          ", " .. strToParse:match(matchDigit)
+                  s = s == "" and m or s .. ", " .. m
               end
-
-              -- remove the parsed part of the string
               strToParse = strToParse:gsub(removeDigit, "", 1)
+              m = strToParse:match(matchDigit)
           end
       end
       return t, s
@@ -867,28 +846,6 @@ if Controls then
       local s = s1 .. separator .. s2
 
       return t1, s
-  end
-
-  function getAdjacentRooms(room)
-      -- print("function start", "getAdjacentRooms", room)
-      -- print("function start on room"..room)
-      local t = {}
-      for wall, roomsTable in ipairs(map) do
-          -- print("w"..w, "rms"..tostring(rms))
-          -- print(wallsState[w])
-          if wallsState[wall] and roomsTable[room] then -- if the wall is open, and the room & wall are paired
-              -- print("rms[room] true")
-              for r, path in ipairs(roomsTable) do
-                  -- print("r"..r, "valid"..tostring(valid))
-                  if path and r ~= room then
-                      -- print("valid and r isn't room")
-                      table.insert(t, r)
-                  end
-              end
-          end
-      end
-      -- printtable("function end\tgetAdjacentRooms", t)
-      return t
   end
 
   function getStartingRooms(wall)
@@ -935,54 +892,70 @@ if Controls then
   function findRoomGroups(wall)
       -- print("function start", "findRoomGroups", wall)
 
-      local unvisitedRooms = getStartingRooms(wall)
-
-      while #unvisitedRooms > 0 do
-          local lowestRoom = 0
-          local startingRoom = unvisitedRooms[1]
-          local currentGroup = {}
-          local roomStack = {}
-
-          table.insert(roomStack, startingRoom)
-
-          while #roomStack > 0 do
-              local currentRoom = table.remove(roomStack)
-
-              table.insert(currentGroup, currentRoom)
-
-              for i, v in ipairs(unvisitedRooms) do
-                  if v == currentRoom then
-                      table.remove(unvisitedRooms, i)
-                  end
-              end
-
-              for _, adjacentRoom in ipairs(getAdjacentRooms(currentRoom)) do
-                  if not tablefind(currentGroup, adjacentRoom) and
-                      not tablefind(roomStack, adjacentRoom) then
-                      table.insert(roomStack, adjacentRoom)
+      -- Pre-compute adjacency list once; avoids rescanning all walls per room
+      local adjacency = {}
+      local adjSeen = {}
+      for r = 1, Properties["Rooms"].Value do
+          adjacency[r] = {}
+          adjSeen[r] = {}
+      end
+      for w, roomsTable in ipairs(map) do
+          if wallsState[w] then
+              for r1, v1 in ipairs(roomsTable) do
+                  if v1 then
+                      for r2, v2 in ipairs(roomsTable) do
+                          if v2 and r1 ~= r2 and not adjSeen[r1][r2] then
+                              adjSeen[r1][r2] = true
+                              table.insert(adjacency[r1], r2)
+                          end
+                      end
                   end
               end
           end
+      end
 
-          table.sort(currentGroup)
+      local startingRooms = getStartingRooms(wall)
+      local unvisited = {}
+      for _, r in ipairs(startingRooms) do unvisited[r] = true end
 
-          local group = currentGroup[1] -- lowest room number denotes the group number
-          groups[group]["members"] = currentGroup
-          groups[group]["validInputs"] = {}
-          groups[group]['History'] = {}
+      for _, startingRoom in ipairs(startingRooms) do
+          if unvisited[startingRoom] then
+              local currentGroup = {}
+              local seen = { [startingRoom] = true }
+              local roomStack = { startingRoom }
+              unvisited[startingRoom] = nil
 
-          for _, room in ipairs(groups[group]["members"]) do
-              -- as well as add members into the groups table, add the groupNo into the rooms[room]["group"] variable
-              rooms[room]["group"] = group
+              while #roomStack > 0 do
+                  local currentRoom = table.remove(roomStack)
+                  table.insert(currentGroup, currentRoom)
+
+                  for _, adj in ipairs(adjacency[currentRoom]) do
+                      if not seen[adj] then
+                          seen[adj] = true
+                          unvisited[adj] = nil
+                          table.insert(roomStack, adj)
+                      end
+                  end
+              end
+
+              table.sort(currentGroup)
+
+              local group = currentGroup[1] -- lowest room number denotes the group number
+              groups[group]["members"] = currentGroup
+              groups[group]["validInputs"] = {}
+              groups[group]['History'] = {}
+
+              for _, room in ipairs(groups[group]["members"]) do
+                  rooms[room]["group"] = group
+              end
+
+              updateLEDs(group)
+
+              -- printtable("function end\tfindRoomGroups\t"..tostring(group), currentGroup)
+
+              updateGroupValidInputs(group)
+              -- printtable("group "..currentGroup[1].." contains:", currentGroup)
           end
-
-          updateLEDs(group)
-
-          -- printtable("function end\tfindRoomGroups\t"..tostring(group), currentGroup)
-
-          updateGroupValidInputs(group)
-          -- printtable("group "..currentGroup[1].." contains:", currentGroup)
-
       end
   end
 
@@ -1057,9 +1030,6 @@ if Controls then
 
       -- if the user is allowed to switch to this input the state is on or the toggleMode is on
       if tablefind(groupValidInputs, input) and (state or toggleMode) then
-
-          -- get the group this room belongs to
-          local group = rooms[room]["group"]
 
           -- switch the group
           if Controls["Link"][1].Boolean then
@@ -1189,10 +1159,8 @@ if Controls then
 
       groups[r]["members"] = {r}
 
-      for i = 1, Properties["Inputs"].Value do
-          Controls["Room " .. r .. " Input"][i].Boolean =
-              rooms[r]["currentInput"] == i and true or false
-      end
+      -- Only set the active button; others are false by default/saved state.
+      Controls["Room " .. r .. " Input"][rooms[r]["currentInput"]].Boolean = true
   end
 
   map = {} -- map[wallNo][roomNo] = true or false depending on if there is an association or not.
@@ -1211,45 +1179,45 @@ if Controls then
       end
   end
 
-  for w = 1, Properties["Walls"].Value do -- can't run this above as map has not been generated yet.
-      if wallsState[w] then findRoomGroups(w) end
+  -- Compute correct per-room validInputs before group assembly so findRoomGroups(0)
+  -- calls updateGroupValidInputs exactly once per group with correct data instead of
+  -- rebuilding adjacency K times (once per open wall) with stale allInputs placeholders.
+  for r = 1, Properties["Rooms"].Value do
+      local mode = rooms[r]["restrictionMode"]
+      local totalInputs = Properties["Inputs"].Value
+      local roomRestrictionInputs = rooms[r]["restrictionInputs"]
+      local roomValidInputs = {}
+      if mode == bypass then
+          for input = 1, totalInputs do table.insert(roomValidInputs, input) end
+      elseif mode == allow then
+          for _, input in ipairs(roomRestrictionInputs) do
+              if input > 0 and input <= totalInputs then
+                  table.insert(roomValidInputs, input)
+              end
+          end
+      elseif mode == restrict then
+          for input = 1, totalInputs do
+              if not tablefind(roomRestrictionInputs, input) then
+                  table.insert(roomValidInputs, input)
+              end
+          end
+      end
+      rooms[r]["validInputs"] = roomValidInputs
   end
-
-  for r = 1, Properties["Rooms"].Value do updateRoomValidInputs(r) end
+  findRoomGroups(0)
 
   -- /\/\  Declare Global Variables  /\/\--
 
   -- \/\/  Event Handlers  \/\/-- 
 
-  for i , ctrl in pairs(Controls['Input Name']) do
-    ctrl.EventHandler = function()
-      for i , _ in pairs(groups) do
-        UpdateComboChoices(i)
-      end
-    end
-  end
-  -- UpdateAllValidInputs()
-
-  for r = 1, Properties["Rooms"].Value, 1 do
-      Controls["Room Select"][r].EventHandler = function(ctl)
-          userSwitch(ctl.String, r, true)
-      end
-      for i = 1, Properties["Inputs"].Value, 1 do
-          Controls["Room " .. r .. " Input"][i].EventHandler = function(ctl)
-              userSwitch(i, r, ctl.Boolean)
-          end
-      end
-
-      if Properties["Input Restriction"].Value then
-          Controls["Restrict Mode"][r].EventHandler = function(ctl)
-              userRestrictModeChange(r, ctl.String)
-          end
-          Controls["Restrict Inputs"][r].EventHandler = function(ctl)
-              userRestrictInputsChange(r, ctl.String)
-          end
+  -- O(I), O(W), O(I), O(N) handlers — small enough to register synchronously.
+  for i, ctrl in pairs(Controls['Input Name']) do
+      ctrl.EventHandler = function()
+          for i, _ in pairs(groups) do UpdateComboChoices(i) end
       end
   end
-  for w = 1, Properties["Walls"].Value, 1 do
+
+  for w = 1, Properties["Walls"].Value do
       Controls["Wall Opens"][w].EventHandler = function(ctl)
           userWallOpenChange(w, ctl.Boolean)
       end
@@ -1260,20 +1228,45 @@ if Controls then
 
   for i, Active in pairs(Controls["Input Active"]) do
       Active.EventHandler = function()
-          if Active.Boolean then
-              HistoryAdd(i)
-          else
-              HistoryRemove(i)
-          end
+          if Active.Boolean then HistoryAdd(i) else HistoryRemove(i) end
       end
   end
 
-  for room , ctrl in pairs(Controls['Select Name']) do
-    ctrl.EventHandler = function()
-      local input = InputNumberfromName(ctrl.String)
-      userSwitch(input, room, true)
-    end
+  for room, ctrl in pairs(Controls['Select Name']) do
+      ctrl.EventHandler = function()
+          userSwitch(InputNumberfromName(ctrl.String), room, true)
+      end
   end
+
+  -- Room handlers are O(rooms × inputs) — chunked across ticks to stay within exec limits.
+  local ROOM_CHUNK = 32
+  local function registerRoomHandlers(startRoom)
+      local totalRooms = Properties["Rooms"].Value
+      local endRoom = math.min(startRoom + ROOM_CHUNK - 1, totalRooms)
+      for r = startRoom, endRoom do
+          Controls["Room Select"][r].EventHandler = function(ctl)
+              userSwitch(ctl.String, r, true)
+          end
+          local roomInputCtrl = Controls["Room " .. r .. " Input"]
+          for i = 1, Properties["Inputs"].Value do
+              roomInputCtrl[i].EventHandler = function(ctl)
+                  userSwitch(i, r, ctl.Boolean)
+              end
+          end
+          if Properties["Input Restriction"].Value then
+              Controls["Restrict Mode"][r].EventHandler = function(ctl)
+                  userRestrictModeChange(r, ctl.String)
+              end
+              Controls["Restrict Inputs"][r].EventHandler = function(ctl)
+                  userRestrictInputsChange(r, ctl.String)
+              end
+          end
+      end
+      if endRoom < totalRooms then
+          Timer.CallAfter(function() registerRoomHandlers(endRoom + 1) end, 0)
+      end
+  end
+  registerRoomHandlers(1)
 
 end
 

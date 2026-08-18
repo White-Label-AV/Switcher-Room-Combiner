@@ -1,18 +1,25 @@
 # Switcher-Room-Combiner
-Switcher Room Combiner lua plugin for the QSC Q-SYS platform.
 
-This plugin mimics the room combiner component build into Q-SYS designer except that instead of mixing audio (combining audio sources) it combines (syncronises) switchers.  In addition to this it features Input Restriction mode that allows each room to only have access to a user definable number of switcher inputs.  When rooms are combined, their own allowed inputs are added to the group's allowed inputs, and each room is able to access the inputs of the other.  When the rooms are separated again they will revert back to the lowest numbered allowed input in their list.
+Switcher Room Combiner lua plugin for the QSC Q-SYS platform. v0.98
 
-Known limits - the room combine algorithm can become big and hits the execution limit when numbers of rooms, walls or room/wall associations gets too great.
+This plugin mimics the room combiner component build into Q-SYS designer except that instead of mixing audio (combining audio sources) it combines (syncronises) switchers. In addition to this it features Input Restriction mode that allows each room to only have access to a user definable number of switcher inputs. When rooms are combined, their own allowed inputs are added to the group's allowed inputs, and each room is able to access the inputs of the other. When the rooms are separated again they will revert back to the lowest numbered allowed input in their list.
 
 ## Features
-* Restrict inputs per room with 3 different modes (Restrict mode, Allow mode, Bypass).  Combined rooms will also combine allowed inputs.
-* Choose your own LED colours!  If you use the room combiner component but want to use your own colours for the LEDs to match your palette, add them as a CSV string under properties.  Accepts any standard colour metadata strings in the form of "#RGB", "#RRGGBB", CSS Color Names, and HSV values using the format "!HHSSVV".  EG `Black,White,#FFFFFF`  - No spaces or quotes.
+
+* Restrict inputs per room with 3 different modes (Restrict mode, Allow mode, Bypass). Combined rooms will also combine all allowed inputs from each room.
+* Choose your own LED colours! If you use the room combiner component but want to use your own colours for the LEDs to match your palette, add them as a comma seperated string under properties.  Accepts any standard colour metadata strings in the form of "#RGB", "#RRGGBB", CSS Color Names, and HSV values using the format "!HHSSVV". EG `Black,White,#FFFFFF` - No spaces or quotes.
 * New property - "Allow toggle off: Yes/No".  This allows a switcher input that is currently on to be toggled off.  This will also allow you to use the plugin with one input as a toggle-room-combiner, therefore syncronising toggle states across rooms.
 
-## To dos:
-* Optimise findRoomGroups() function to allow more rooms to work without hitting execution limit.
-* Set debug.sethook() to remove the execution limit after significant testing.
-* Output/Input on a single pin all walls open & wall/room association info so downstream plugins don't need to run room finding algorithm.
+## Known limits
 
-* New property - "Default inputs" - will show new controls to specify a single input to become the default when a room is uncombined.
+* The room combine algorithm can hit the execution limit when numbers of rooms, walls or room/wall associations gets too large.
+
+## To dos
+
+* Break out each section to a seperate file as per Q-sys standard plugin
+* Add debug info as per Q-Sys standard plugin
+* Optimise findRoomGroups() function to allow more rooms to work without hitting execution limit.
+* Algorithmically generate a unique set of colours for the room LEDs.
+* New control - "Uncombine action" - will allow a default input to be set, or returning to previous value upon a room uncombining.
+* Add an Auto Switch feature per room.
+* Should switchdelay be a user editable field? (yes). Probably also per room.
