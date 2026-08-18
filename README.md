@@ -34,17 +34,24 @@ option and auto switch additions by James Martin, QSC.
 - **Select by name.** Each room has a combo box listing the names of the inputs
   it is currently allowed, alongside the numeric selector.
 
+<!-- qsys-dev:install start -->
 ## Installation
 
-Download the `.qplug` from [Releases](https://github.com/jcerecke/Switcher-Room-Combiner/releases)
-and drop it into:
+No public NuGet feed is configured for this plugin yet, so install it manually:
+download the `.qplug` from
+[Releases](https://github.com/jcerecke/Switcher-Room-Combiner/releases) and drop
+it into
 
 ```
 %USERPROFILE%\Documents\QSC\Q-Sys Designer\Plugins
 ```
 
-Restart Q-SYS Designer. The plugin appears in **Schematic Elements → White Label
-AV → Room Combine Switcher**.
+Restart Q-SYS Designer. The plugin appears under **Schematic Elements → White
+Label AV → Room Combine Switcher**.
+
+Once a feed exists, `nupkg.py --push` rewrites this section in place with the
+Q-SYS Library steps and the feed's registration URL.
+<!-- qsys-dev:install end -->
 
 ## Configuration
 
