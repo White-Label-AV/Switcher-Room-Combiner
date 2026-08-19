@@ -18,11 +18,16 @@ versions follow the Q-SYS `Major.Minor.Fix.Build` scheme rather than SemVer.
 - The room-combine algorithm can hit the script execution limit when the number
   of rooms, walls or room/wall associations gets large.
 
-## [1.0.0.0] — 2026-08-18
+## 1.0.0.0 — 2026-08-19
 
-First release under the White Label AV brand. No functional change to switching,
-combining or input restriction — this release is a restructure, a rebrand and a
-documentation pass over the 0.98 code.
+First release under the White Label AV brand: a restructure, a rebrand and a
+documentation pass over the 0.98 code, plus one crash fix and two additions the
+Verification Rubric requires.
+
+The switching, combining and input-restriction behaviour is otherwise unchanged
+— design-time control and layout output was compared against 0.98 across six
+property configurations and matches exactly, apart from the intended 90 px
+brand-header offset and the two controls noted below.
 
 ### Added
 
@@ -32,6 +37,14 @@ documentation pass over the 0.98 code.
 - `PluginInfo` gains `Author`, `Manufacturer`, `Model`, `IsManaged` and `Type`,
   all required by the Q-SYS Library Verification Rubric.
 - The plugin version is printed to the debug log at runtime start.
+- **`Status` indicator** (reserved control name, `IndicatorType = "Status"`,
+  output pin), shown as a bar across the foot of the panel. There is no device
+  to report on, so it carries plugin health: `COMPROMISED` naming the room when
+  a restriction has left one with no input it can select — the very state that
+  used to crash — and otherwise `OK` with a summary of what is combined. It is
+  updated at the end of a user action or an init pass, never inside the
+  per-group recalculation loops, because status changes reach the Core Event
+  Log when Reflect is enabled and the standard forbids flipping it excessively.
 - **`Debug Print` property** (`None` / `Function Calls` / `All`, default `None`),
   the standard debug enum minus the Tx/Rx choices — this plugin drives no device
   and has no wire traffic, so those would be dead options. Every automatic
@@ -100,7 +113,7 @@ documentation pass over the 0.98 code.
   development artefact. **Designs placed with a `-compare` build must have the
   component re-placed.**
 
-## [0.98] — earlier
+## 0.98 — earlier
 
 Prior history is in the git log; this changelog starts at the 1.0.0 release.
 

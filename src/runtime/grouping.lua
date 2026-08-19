@@ -32,12 +32,20 @@
     local colourIndex = (group - 1) % (#ledColours - 1) + 1
     local combinedState = #groupMembers > 1 and true or false
 
+    -- Rubric 8 wants generic styling so integrators can restyle on a UCI, but
+    -- here the colour IS the information: it is how an operator tells which
+    -- rooms are combined into which group, and the palette is a documented
+    -- property. The stock Room Combiner colours its LEDs the same way. Note
+    -- this silences the linter, not the rubric — it still needs a waiver at
+    -- Library submission.
     for _, room in ipairs(groupMembers) do
       -- if there's more than 1 room in the group, rooms are combined.
       Controls["Room LED"][room].Boolean = combinedState
       if combinedState then
+        -- qsys-lint: ignore QP009 group colour identifies the combine group
         Controls["Room LED"][room].Color = ledColours[colourIndex]
       else
+        -- qsys-lint: ignore QP009 off colour is the last entry of the palette
         Controls["Room LED"][room].Color = offColour
       end
     end

@@ -27,6 +27,7 @@
 -- it calls and the handlers must follow init.
 if Controls then
 --[[ #include "runtime/util.lua" ]]
+--[[ #include "runtime/status.lua" ]]
 --[[ #include "runtime/inputs.lua" ]]
 --[[ #include "runtime/switching.lua" ]]
 --[[ #include "runtime/grouping.lua" ]]

@@ -193,6 +193,8 @@
     <tr><th>Control</th><th>Type</th><th>Count</th><th>Default</th><th>Range</th><th>Pin name</th><th>Pin direction</th><th>Description</th></tr>
   </thead>
   <tbody>
+    <tr><td>Status</td><td>Status Indicator</td><td>1</td><td>OK</td><td>0 = OK, 1 = Compromised</td><td>Status</td><td>Output</td>
+        <td>Plugin health. <code>OK</code> with a summary of what is combined; <code>Compromised</code> naming the room(s) when a restriction has left one with no input it can select. This plugin controls no device, so there is no connection state to report.</td></tr>
     <tr><td>Link</td><td>Toggle Button</td><td>1</td><td>off</td><td>0–1</td><td>Link</td><td>Both</td>
         <td>When on, a switch request moves the whole group. When off, only the room that was touched switches.</td></tr>
     <tr><td>Auto</td><td>Toggle Button</td><td>1</td><td>off</td><td>0–1</td><td>Auto</td><td>Both</td>
