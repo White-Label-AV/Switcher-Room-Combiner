@@ -37,22 +37,25 @@ option and auto switch additions by James Martin, QSC.
 <!-- qsys-dev:install start -->
 ## Installation
 
-No public NuGet feed is configured for this plugin yet, so install it manually:
-download the `.qplug` from
-[Releases](https://github.com/jcerecke/Switcher-Room-Combiner/releases) and drop
-it into
+This plugin is published as a NuGet package and installs through the
+[Q-SYS Library](https://help.qsys.com/Content/Q-SYS_Library/Q-SYS_Library.htm).
+Q-SYS Designer 10.1 or later is required.
 
-```
-%USERPROFILE%\Documents\QSC\Q-Sys Designer\Plugins
-```
+1. Sign in to [library.qsys.com](https://library.qsys.com) with your QSC ID.
+2. Go to **My Library** and open the **My Packages** tab.
+3. Click **Add Personal Package**.
+4. Fill in the two fields:
 
-Designer watches that folder and picks the plugin up live — no restart needed.
-It appears under **Schematic Elements → White Label AV → Room Combine
-Switcher**. A component already placed in a design keeps its old code until it
-is deleted and re-added.
+   | Field | Value |
+   | --- | --- |
+   | **Asset Name** | Room Combine Switcher |
+   | **Package URL** | `https://library.whitelabelav.co.nz/registration/white-label-av-room-combine-switcher/index.json` |
 
-Once a feed exists, `nupkg.py --push` rewrites this section in place with the
-Q-SYS Library steps and the feed's registration URL.
+5. Click **Add Package**.
+
+The plugin then appears in the Asset Installer in Q-SYS Designer. Install it
+from there, and it shows up under Schematic Elements ready to drag onto a
+design.
 <!-- qsys-dev:install end -->
 
 ## Configuration
