@@ -1,0 +1,14 @@
+{
+  "sources": [
+    {
+      "name": "library",
+      "type": "s3",
+      "bucketName": "library",
+      "serviceURL": "https://fd191267442e8a64b89a9f156553c6db.r2.cloudflarestorage.com",
+      "path": "https://library.whitelabelav.co.nz/",
+      "accessKeyId": "$SLEET_ACCESS_KEY_ID$",
+      "secretAccessKey": "$SLEET_SECRET_ACCESS_KEY$",
+      "disablePayloadSigning": true
+    }
+  ]
+}

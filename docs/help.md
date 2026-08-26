@@ -1,6 +1,6 @@
 ---
 qds_version: "9.13.1 and above"
-tested_hardware: "Host-side test harness (Lua 5.3) only — not yet verified in Q-SYS Designer or on a Core"
+tested_hardware: "Q-SYS Designer 9.13.1 — control panel verified in Designer; not yet run on a Core"
 instance_limit: "No fixed limit, but see Important Notes on the script execution limit"
 ---
 
