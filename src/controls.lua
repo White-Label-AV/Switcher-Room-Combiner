@@ -10,18 +10,6 @@
 function GetControls(props)
   local ctrl = {}
 
-  -- Reserved control name. There is no device to report on, so this carries
-  -- plugin health instead: COMPROMISED when a restriction has left a room with
-  -- nothing it may select, otherwise OK with the current combine summary.
-  table.insert(ctrl, {
-    Name = "Status",
-    ControlType = "Indicator",
-    IndicatorType = "Status",
-    Count = 1,
-    UserPin = true,
-    PinStyle = "Output"
-  })
-
   table.insert(ctrl, {
     Name = "Link",
     ControlType = "Button",

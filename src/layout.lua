@@ -429,19 +429,5 @@ function GetControlLayout(props)
     Size = buttonSize
   })
 
-  -- Status bar across the foot of the panel. Style must be "Text" per the
-  -- Status Reporting standard, which also forbids styling it at runtime.
-  -- wallsBoxPos is read here rather than earlier because the Input Restrict
-  -- panel shifts it down when that property is on.
-  layout["Status"] = {
-    PrettyName = "Status",
-    Style = "Text",
-    Position = {
-      boxMargin[left],
-      wallsBoxPos[y] + wallsBoxSize[y] + boxMargin[top]
-    },
-    Size = {panelWidth - boxMargin[left] - boxMargin[right], 20}
-  }
-
   return layout, graphics
 end

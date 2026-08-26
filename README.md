@@ -33,9 +33,6 @@ option and auto switch additions by James Martin, QSC.
   pins) and follows the most recent one per group.
 - **Select by name.** Each room has a combo box listing the names of the inputs
   it is currently allowed, alongside the numeric selector.
-- **Status reporting.** A `Status` indicator summarises what is combined, and
-  goes amber naming the room when a restriction has left one with no input it
-  can select.
 
 <!-- qsys-dev:install start -->
 ## Installation
@@ -49,8 +46,10 @@ it into
 %USERPROFILE%\Documents\QSC\Q-Sys Designer\Plugins
 ```
 
-Restart Q-SYS Designer. The plugin appears under **Schematic Elements → White
-Label AV → Room Combine Switcher**.
+Designer watches that folder and picks the plugin up live — no restart needed.
+It appears under **Schematic Elements → White Label AV → Room Combine
+Switcher**. A component already placed in a design keeps its old code until it
+is deleted and re-added.
 
 Once a feed exists, `nupkg.py --push` rewrites this section in place with the
 Q-SYS Library steps and the feed's registration URL.
@@ -106,7 +105,8 @@ src/controls.lua      GetControls
 src/layout.lua        GetControlLayout — draws the brand header, then the panel
 src/runtime/          the `if Controls then` block, split by responsibility
 vendor/wlav-brand/    shared WLAV brand header (git submodule)
-docs/pluginhelp.htm   help document; F1 in Designer opens it
+docs/help.md          prose for the help document — edit this
+docs/pluginhelp.htm   GENERATED from help.md + the source; never edit it
 ```
 
 `src/runtime/` is included in dependency order: `util` (array normalisation,
@@ -130,6 +130,18 @@ python3 scripts/build.py src/plugin.lua --watch --deploy
 ```bash
 python3 scripts/qsys_lint.py src/plugin.lua
 ```
+
+The help document is generated, never hand-written: every factual table in it —
+property types, defaults, ranges, control types, pin directions — is read from
+the plugin source at generation time, so it cannot drift. Edit the prose in
+`docs/help.md` and regenerate:
+
+```bash
+python3 scripts/docgen.py src/plugin.lua
+```
+
+`release.py` runs `docgen.py --check` and stops if the document has TODOs or has
+drifted from the source, so a release cannot ship stale documentation.
 
 The linter is clean under `--strict`: no errors, no warnings.
 

@@ -110,6 +110,3 @@
   end
 
   findRoomGroups(0)
-
-  -- Establish the initial status once the groups are known.
-  UpdateStatus()

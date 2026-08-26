@@ -21,30 +21,23 @@ versions follow the Q-SYS `Major.Minor.Fix.Build` scheme rather than SemVer.
 ## 1.0.0.0 — 2026-08-19
 
 First release under the White Label AV brand: a restructure, a rebrand and a
-documentation pass over the 0.98 code, plus one crash fix and two additions the
-Verification Rubric requires.
+documentation pass over the 0.98 code, plus one crash fix and the debug
+property the Verification Rubric requires.
 
 The switching, combining and input-restriction behaviour is otherwise unchanged
 — design-time control and layout output was compared against 0.98 across six
 property configurations and matches exactly, apart from the intended 90 px
-brand-header offset and the two controls noted below.
+brand-header offset and the one control noted below.
 
 ### Added
 
 - White Label AV brand header on the control panel, vendored as a git submodule
   from [wlav-plugin-brand](https://github.com/White-Label-AV/wlav-plugin-brand).
   All panel content now lays out from the offset the header returns.
-- `PluginInfo` gains `Author`, `Manufacturer`, `Model`, `IsManaged` and `Type`,
-  all required by the Q-SYS Library Verification Rubric.
+- `PluginInfo` gains `Author`, `Manufacturer`, `Model`, `IsManaged` and `Type`.
+  The Verification Rubric requires the first four of every plugin; `Type` and
+  `Manufacturer` matter to Reflect-enabled plugins and are set for completeness.
 - The plugin version is printed to the debug log at runtime start.
-- **`Status` indicator** (reserved control name, `IndicatorType = "Status"`,
-  output pin), shown as a bar across the foot of the panel. There is no device
-  to report on, so it carries plugin health: `COMPROMISED` naming the room when
-  a restriction has left one with no input it can select — the very state that
-  used to crash — and otherwise `OK` with a summary of what is combined. It is
-  updated at the end of a user action or an init pass, never inside the
-  per-group recalculation loops, because status changes reach the Core Event
-  Log when Reflect is enabled and the standard forbids flipping it excessively.
 - **`Debug Print` property** (`None` / `Function Calls` / `All`, default `None`),
   the standard debug enum minus the Tx/Rx choices — this plugin drives no device
   and has no wire traffic, so those would be dead options. Every automatic
@@ -54,8 +47,10 @@ brand-header offset and the two controls noted below.
   start-up stays ungated, as the Debug Requirements standard expects.
   `printmap()` and `printwalls()` remain unconditional: they are manual console
   helpers, never called automatically.
-- `docs/pluginhelp.htm` — the help document required for Library submission.
-  F1 on the plugin in Designer opens it.
+- `docs/help.md` and the generated `docs/pluginhelp.htm` — the help document
+  required for Library submission. Every factual table in it is read from the
+  plugin source at generation time, so it cannot drift; only the prose is
+  authored. F1 on the plugin in Designer opens it.
 - `CHANGELOG.md`, and a `NuGet` package definition for distribution through the
   Q-SYS Library.
 

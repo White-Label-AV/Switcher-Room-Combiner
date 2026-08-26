@@ -39,7 +39,6 @@
 
     -- update room and group valid inputs and then check the group is on valid input.
     updateRoomValidInputs(room)
-    UpdateStatus()
   end
 
   function userRestrictInputsChange(room, inputsTextBox)
@@ -56,7 +55,6 @@
     Controls["Restrict Inputs"][room].String = sanitisedText
 
     updateRoomValidInputs(room)
-    UpdateStatus()
   end
 
   function userWallOpenChange(wall, state)
@@ -66,7 +64,6 @@
     wallsState[wall] = state
 
     findRoomGroups(wall)
-    UpdateStatus()
   end
 
   function userWallRoomsChange(wall, roomsTextBox)
@@ -87,6 +84,5 @@
 
     -- if the wall is open then the room groups will have changed
     if wallsState[wall] then findRoomGroups(wall) end
-    UpdateStatus()
 
   end
