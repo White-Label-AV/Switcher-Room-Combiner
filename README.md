@@ -169,6 +169,8 @@ needs a waiver at Library submission**; the marker only keeps it out of the
 - "Uncombine action" — return to a default input, or to the previous value, when
   a room separates.
 - Make the auto-switch delay a user-editable field, probably per room.
+- Output (and accept) wall-open and wall/room association state on a single pin,
+  so downstream plugins don't need to re-run the room-finding algorithm.
 
 ## Licence
 
