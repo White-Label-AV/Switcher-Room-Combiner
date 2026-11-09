@@ -8,8 +8,6 @@ function GetProperties()
     {Name = "Walls", Type = "integer", Min = 1, Max = 256, Value = 1},
     {Name = "Inputs", Type = "integer", Min = 1, Max = 128, Value = 2},
     {Name = "Input Restriction", Type = "boolean", Value = false},
-    {Name = "Use Custom Colours", Type = "boolean", Value = false},
-    {Name = "Custom Colours CSV", Type = "string"},
     {Name = "Allow Toggle Off", Type = "boolean", Value = false},
     -- The standard debug enum, minus the Tx/Rx choices: this plugin drives no
     -- device and has no wire traffic, so offering them would be a dead option.

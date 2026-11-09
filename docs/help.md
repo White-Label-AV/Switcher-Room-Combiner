@@ -119,21 +119,6 @@ the restriction logic is bypassed entirely and no buttons are hidden. The
 Restrict Mode and Restrict Inputs controls keep their saved values while
 hidden, so turning this off and on again does not lose the setup.
 
-### Use Custom Colours
-
-Uses the palette in **Custom Colours CSV** instead of the built-in room LED
-colours. Turn it on to match the combine indicators to a house palette or to an
-existing Room Combiner elsewhere in the design.
-
-### Custom Colours CSV
-
-The palette used for the room LEDs, as a comma-separated list with no spaces or
-quotes — for example `Red,LimeGreen,Cyan,#7C0000`. Accepts `#RGB`, `#RRGGBB`,
-CSS colour names, and HSV in the form `!HHSSVV`. The **last** entry is the
-colour shown when a room is not combined; the entries before it are handed out
-to combined groups in turn, so supply at least as many as the largest number of
-simultaneous groups you expect. Only read when **Use Custom Colours** is on.
-
 ### Allow Toggle Off
 
 Lets an input that is currently on be toggled back off, leaving the room on no
@@ -252,6 +237,10 @@ Sanitised and written back on entry. Hidden unless **Input Restriction** is on.
   The room now deselects cleanly instead. Present since 0.98.
 - Fixed **Restrict Mode** and **Restrict Inputs** having no layout entry when
   **Input Restriction** was off, which left those controls unplaced.
+- Removed the **Use Custom Colours** and **Custom Colours CSV** properties.
+  The room LEDs now always use the built-in palette. A design that set custom
+  colours keeps working, but its LEDs revert to the defaults; use the separate
+  Custom LEDs plugin to recolour them.
 - Removed a hidden 1×1 development control that was never read. This removes a
   user pin; a design that wired it will show a missing pin.
 - The plugin's internal identifier lost a `-compare` development suffix. A
@@ -264,7 +253,8 @@ Sanitised and written back on entry. Hidden unless **Input Restriction** is on.
 
 - Per-room input restriction with Bypass, Allow and Restrict modes, with
   combined rooms pooling their allowed inputs.
-- User-definable room LED colours via a comma-separated property.
+- User-definable room LED colours via a comma-separated property (removed
+  in 1.0.0.0; see the Custom LEDs plugin).
 - **Allow Toggle Off**, letting an active input be toggled back off and
   enabling single-input toggle-combiner use.
 - Auto switch, following the most recently activated input per group.

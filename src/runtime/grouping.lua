@@ -34,8 +34,7 @@
 
     -- Rubric 8 wants generic styling so integrators can restyle on a UCI, but
     -- here the colour IS the information: it is how an operator tells which
-    -- rooms are combined into which group, and the palette is a documented
-    -- property. The stock Room Combiner colours its LEDs the same way. Note
+    -- rooms are combined into which group. The stock Room Combiner colours its LEDs the same way. Note
     -- this silences the linter, not the rubric — it still needs a waiver at
     -- Library submission.
     for _, room in ipairs(groupMembers) do
