@@ -22,10 +22,6 @@ option and auto switch additions by James Martin, QSC.
   inputs). Combined rooms take the **union** of their members' allowed inputs,
   so combining grants each room access to the others'. Separating reverts each
   room to its own list.
-- **Custom LED colours.** Match the room LEDs to your own palette with a
-  comma-separated list. Accepts `#RGB`, `#RRGGBB`, CSS colour names and HSV in
-  the form `!HHSSVV` — e.g. `Black,White,#FFFFFF`, no spaces or quotes. The last
-  entry is the OFF colour; the rest cycle across combined groups.
 - **Allow toggle off.** Lets an input that is currently on be toggled back off.
   With a single input this turns the plugin into a toggle-room-combiner,
   synchronising toggle states across rooms.
@@ -69,8 +65,6 @@ Set these in the Properties pane before wiring anything — `Rooms`, `Walls` and
 | Walls | integer | 1 | 1–256 | Number of walls that can join rooms |
 | Inputs | integer | 2 | 1–128 | Number of switcher inputs |
 | Input Restriction | boolean | false | — | Shows the per-room restriction panel |
-| Use Custom Colours | boolean | false | — | Use the CSV below instead of the built-in LED colours |
-| Custom Colours CSV | string | *(empty)* | — | Comma-separated colours, last one is the OFF colour |
 | Allow Toggle Off | boolean | false | — | Lets an active input be toggled back off |
 | Debug Print | enum | None | None / Function Calls / All | Debug verbosity. `Function Calls` traces switching and grouping; `All` adds the resolved input lists |
 
@@ -154,7 +148,7 @@ The linter is clean under `--strict`: no errors, no warnings.
 `.Color` on the room LEDs at runtime, which trips **QP009**. Both lines carry a
 `-- qsys-lint: ignore QP009` marker, because here the colour *is* the
 information — it is how an operator tells which rooms are combined into which
-group, and the palette is a documented property. The stock Room Combiner
+group. The stock Room Combiner
 colours its LEDs the same way.
 
 Silencing the linter is not the same as conforming to rubric §8. **This still
@@ -164,8 +158,6 @@ needs a waiver at Library submission**; the marker only keeps it out of the
 ## Roadmap
 
 - Optimise `findRoomGroups()` so more rooms fit inside the execution limit.
-- Algorithmically generate a distinct colour per room LED — `defaultH_Values` in
-  `src/runtime/init.lua` already holds 256 evenly-spread HSV hues for this.
 - "Uncombine action" — return to a default input, or to the previous value, when
   a room separates.
 - Make the auto-switch delay a user-editable field, probably per room.

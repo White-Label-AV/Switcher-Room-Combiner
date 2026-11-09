@@ -46,14 +46,6 @@
   function dbgFn(...) if DebugFunction then print(...) end end
   function dbgState(...) if DebugState then print(...) end end
 
-  function split(source, delimiters)
-    local elements = {}
-    local pattern = '([^' .. delimiters .. ']+)'
-    string.gsub(source, pattern,
-                function(value) elements[#elements + 1] = value; end);
-    return elements
-  end
-
   function printmap() -- dev helper: dump the wall/room association matrix
     local x = ""
     for w = 1, Properties["Walls"].Value do

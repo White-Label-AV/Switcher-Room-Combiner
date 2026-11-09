@@ -242,75 +242,63 @@ footer .logo { display: inline-block; margin-top: 6px; opacity: 0.85; }
 <h2>Properties</h2>
 <h4 class="BridgeHead">Rooms</h4>
 <p>How many rooms the plugin manages. Sizes the Room Select, Room LED, Select Name, Restrict Mode and Restrict Inputs arrays, and creates one **Room <i>r</i> Input** button array per room. Set it to the number of independently switchable spaces in the installation, counting each divisible section separately.</p>
-<p class="meta"><span class="k">Type</span> integer<span class="sep">|</span><span class="k">Default</span> 2<span class="sep">|</span><span class="k">Accepted values</span> 2 to 256</p>
 <h4 class="BridgeHead">Walls</h4>
 <p>How many movable walls can join rooms. Each wall gets an open/closed button and a box listing the rooms it joins. Count the physical partitions, not the rooms — a single wall between two halls is one wall.</p>
-<p class="meta"><span class="k">Type</span> integer<span class="sep">|</span><span class="k">Default</span> 1<span class="sep">|</span><span class="k">Accepted values</span> 1 to 256</p>
 <h4 class="BridgeHead">Inputs</h4>
 <p>How many switcher inputs each room can select from. Sizes the Input Active and Input Name arrays and every per-room button array. Set it to the number of sources on the switcher this plugin drives.</p>
-<p class="meta"><span class="k">Type</span> integer<span class="sep">|</span><span class="k">Default</span> 2<span class="sep">|</span><span class="k">Accepted values</span> 1 to 128</p>
 <h4 class="BridgeHead">Input Restriction</h4>
 <p>Reveals the per-room restriction panel, letting each room be limited to a subset of the inputs. Leave it off when every room may select every source — the restriction logic is bypassed entirely and no buttons are hidden. The Restrict Mode and Restrict Inputs controls keep their saved values while hidden, so turning this off and on again does not lose the setup.</p>
-<p class="meta"><span class="k">Type</span> boolean<span class="sep">|</span><span class="k">Accepted values</span> Yes, No</p>
-<h4 class="BridgeHead">Use Custom Colours</h4>
-<p>Uses the palette in <b>Custom Colours CSV</b> instead of the built-in room LED colours. Turn it on to match the combine indicators to a house palette or to an existing Room Combiner elsewhere in the design.</p>
-<p class="meta"><span class="k">Type</span> boolean<span class="sep">|</span><span class="k">Accepted values</span> Yes, No</p>
-<h4 class="BridgeHead">Custom Colours CSV</h4>
-<p>The palette used for the room LEDs, as a comma-separated list with no spaces or quotes — for example <code>Red,LimeGreen,Cyan,#7C0000</code>. Accepts <code>#RGB</code>, <code>#RRGGBB</code>, CSS colour names, and HSV in the form <code>!HHSSVV</code>. The <b>last</b> entry is the colour shown when a room is not combined; the entries before it are handed out to combined groups in turn, so supply at least as many as the largest number of simultaneous groups you expect. Only read when <b>Use Custom Colours</b> is on.</p>
-<p class="meta"><span class="k">Type</span> string<span class="sep">|</span><span class="k">Default</span> <i>empty</i></p>
 <h4 class="BridgeHead">Allow Toggle Off</h4>
 <p>Lets an input that is currently on be toggled back off, leaving the room on no input at all. With <b>Inputs</b> set to 1 this turns the plugin into a toggle-room-combiner, synchronising a single on/off state across combined rooms instead of a source selection.</p>
-<p class="meta"><span class="k">Type</span> boolean<span class="sep">|</span><span class="k">Accepted values</span> Yes, No</p>
 <h4 class="BridgeHead">Debug Print</h4>
 <p>How much the plugin writes to its debug window. <b>Function Calls</b> traces entry into the switching and grouping functions; <b>All</b> additionally dumps each room's and group's resolved valid-input list. The plugin version is printed at start-up whatever this is set to. Leave it at <b>None</b> in production — these functions run on every switch and every combine, and the output is costly on a large design.</p>
-<p class="meta"><span class="k">Type</span> enum<span class="sep">|</span><span class="k">Default</span> None<span class="sep">|</span><span class="k">Accepted values</span> None, Function Calls, All</p>
 <h2>Controls</h2>
 <h4 class="BridgeHead">Link</h4>
 <p>When on, a switch request moves the whole group the room belongs to. When off, only the room that was touched switches, even while it is combined with others. This is the control that makes combining mean anything, so it is normally left on and exposed to a UCI only where an operator genuinely needs to break a room out temporarily.</p>
 <p class="meta"><span class="k">Type</span> Toggle Button</p>
-<h4 class="BridgeHead">Wall Rooms</h4>
+<h4 class="BridgeHead">Wall Rooms [n]</h4>
 <p>Which rooms this wall joins, as a list or range — <code>1-4, 7</code>. The entry is sanitised and written back, so anything unparseable is discarded and the tidied form appears in the box. A wall with no rooms listed joins nothing and has no effect when opened.</p>
-<p class="meta"><span class="k">Type</span> Text Field</p>
-<h4 class="BridgeHead">Wall Opens</h4>
+<p class="meta"><span class="k">Type</span> Text Field<span class="sep">|</span><span class="k">Count</span> set by <b>Walls</b></p>
+<h4 class="BridgeHead">Wall Opens [n]</h4>
 <p>Opens (on) or closes (off) the wall, combining or separating the rooms associated with it. This is normally driven from a wall-position sensor or a room-configuration UCI rather than touched directly.</p>
-<p class="meta"><span class="k">Type</span> Toggle Button</p>
-<h4 class="BridgeHead">Room Select</h4>
+<p class="meta"><span class="k">Type</span> Toggle Button<span class="sep">|</span><span class="k">Count</span> set by <b>Walls</b></p>
+<h4 class="BridgeHead">Room Select [n]</h4>
 <p>The room's current input, by number. Writable — setting it requests a switch, subject to the same validity checks as pressing the button. Reads back empty when the room is on no input.</p>
-<p class="meta"><span class="k">Type</span> Text Field<span class="sep">|</span><span class="k">Count</span> 2</p>
-<h4 class="BridgeHead">Room LED</h4>
+<p class="meta"><span class="k">Type</span> Text Field<span class="sep">|</span><span class="k">Count</span> set by <b>Rooms</b></p>
+<h4 class="BridgeHead">Room LED [n]</h4>
 <p>Lit when the room is combined with at least one other, and coloured to identify which group it belongs to. Unlit when the room is standing alone. Panel indicator only — it carries no pin, since the same information is available from the room's group membership.</p>
-<p class="meta"><span class="k">Type</span> LED Indicator<span class="sep">|</span><span class="k">Count</span> 2</p>
-<h4 class="BridgeHead">Select Name</h4>
+<p class="meta"><span class="k">Type</span> LED Indicator<span class="sep">|</span><span class="k">Count</span> set by <b>Rooms</b></p>
+<h4 class="BridgeHead">Select Name [n]</h4>
 <p>The room's current input, by name. The choices are repopulated from <b>Input Name</b> whenever the group's valid inputs change, so the list only ever offers sources the room may actually reach.</p>
-<p class="meta"><span class="k">Type</span> Text Field<span class="sep">|</span><span class="k">Count</span> 2</p>
-<h4 class="BridgeHead">Room 1 Input</h4>
+<p class="meta"><span class="k">Type</span> Text Field<span class="sep">|</span><span class="k">Count</span> set by <b>Rooms</b></p>
+<h4 class="BridgeHead">Room 1 Input [n]</h4>
 <p>Radio-style input selection for room 1. One of these arrays exists per room, named for that room, each with one button per input. Buttons for inputs the room may not currently reach are hidden rather than disabled, so an operator is never offered a source that will be refused.</p>
-<p class="meta"><span class="k">Type</span> Toggle Button<span class="sep">|</span><span class="k">Count</span> 2</p>
-<h4 class="BridgeHead">Room 2 Input</h4>
+<p class="meta"><span class="k">Type</span> Toggle Button<span class="sep">|</span><span class="k">Count</span> set by <b>Inputs</b></p>
+<h4 class="BridgeHead">Room 2 Input [n]</h4>
 <p>Radio-style input selection for room 2, and so on for every room the <b>Rooms</b> property creates. See <b>Room 1 Input</b>.</p>
-<p class="meta"><span class="k">Type</span> Toggle Button<span class="sep">|</span><span class="k">Count</span> 2</p>
-<h4 class="BridgeHead">Input Active</h4>
+<p class="meta"><span class="k">Type</span> Toggle Button<span class="sep">|</span><span class="k">Count</span> set by <b>Inputs</b></p>
+<h4 class="BridgeHead">Input Active [n]</h4>
 <p>An input <i>to</i> the plugin: drive each of these from the corresponding source's own presence or active detection. It feeds the Auto switch history and is what lets a group follow a source that has just come alive. Leave unwired if Auto switching is not used.</p>
-<p class="meta"><span class="k">Type</span> LED Indicator<span class="sep">|</span><span class="k">Count</span> 2</p>
-<h4 class="BridgeHead">Input Name</h4>
+<p class="meta"><span class="k">Type</span> LED Indicator<span class="sep">|</span><span class="k">Count</span> set by <b>Inputs</b></p>
+<h4 class="BridgeHead">Input Name [n]</h4>
 <p>The display name for each input. Populates the <b>Select Name</b> combo boxes and is otherwise cosmetic. Worth setting even when Select Name is unused, since the names surface anywhere the plugin reports a source.</p>
-<p class="meta"><span class="k">Type</span> Text Field<span class="sep">|</span><span class="k">Count</span> 2</p>
+<p class="meta"><span class="k">Type</span> Text Field<span class="sep">|</span><span class="k">Count</span> set by <b>Inputs</b></p>
 <h4 class="BridgeHead">Auto</h4>
 <p>Enables auto switching. The group follows the most recently activated input reported on <b>Input Active</b>, after a half-second delay, and falls back to the previous live source when the current one drops. Requires <b>Input Active</b> to be wired to real source-presence detection to be of any use.</p>
 <p class="meta"><span class="k">Type</span> Toggle Button</p>
-<h4 class="BridgeHead">Restrict Mode</h4>
+<h4 class="BridgeHead">Restrict Mode [n]</h4>
 <p>How the room's input restriction is interpreted. <b>Bypass</b> allows every input. <b>Allow</b> permits only those listed in <b>Restrict Inputs</b>. <b>Restrict</b> permits everything <i>except</i> those listed. Enter the input list before changing the mode — setting Allow against an empty list leaves the room with nothing it can select. Hidden unless <b>Input Restriction</b> is on.</p>
-<p class="meta"><span class="k">Type</span> Text Field<span class="sep">|</span><span class="k">Count</span> 2</p>
-<h4 class="BridgeHead">Restrict Inputs</h4>
+<p class="meta"><span class="k">Type</span> Text Field<span class="sep">|</span><span class="k">Count</span> set by <b>Rooms</b></p>
+<h4 class="BridgeHead">Restrict Inputs [n]</h4>
 <p>The input list that <b>Restrict Mode</b> acts on, as a list or range — <code>1-3, 6</code>. Sanitised and written back on entry. Hidden unless <b>Input Restriction</b> is on.</p>
-<p class="meta"><span class="k">Type</span> Text Field<span class="sep">|</span><span class="k">Count</span> 2</p>
+<p class="meta"><span class="k">Type</span> Text Field<span class="sep">|</span><span class="k">Count</span> set by <b>Rooms</b></p>
 <h2>Control Pins</h2>
 <table class="shaded">
   <thead><tr><th>Pin Name</th><th>Value</th><th>String</th><th>Position</th><th>Pins Available</th></tr></thead>
   <tbody>
     <tr><td>Link</td><td class="c">0<br />1</td><td class="c">false<br />true</td><td class="c">0<br />1</td><td class="c">Both</td></tr>
-    <tr><td>Wall Rooms</td><td class="c">&#8211;</td><td class="c">(Text)</td><td class="c">&#8211;</td><td class="c">Both</td></tr>
-    <tr><td>Wall Opens</td><td class="c">0<br />1</td><td class="c">false<br />true</td><td class="c">0<br />1</td><td class="c">Both</td></tr>
+    <tr><td>Wall Rooms [n]</td><td class="c">&#8211;</td><td class="c">(Text)</td><td class="c">&#8211;</td><td class="c">Both</td></tr>
+    <tr><td>Wall Opens [n]</td><td class="c">0<br />1</td><td class="c">false<br />true</td><td class="c">0<br />1</td><td class="c">Both</td></tr>
     <tr><td>Room Select [n]</td><td class="c">&#8211;</td><td class="c">(Text)</td><td class="c">&#8211;</td><td class="c">Both</td></tr>
     <tr><td>Select Name [n]</td><td class="c">&#8211;</td><td class="c">(Text)</td><td class="c">&#8211;</td><td class="c">Both</td></tr>
     <tr><td>Room 1 Input [n]</td><td class="c">0<br />1</td><td class="c">false<br />true</td><td class="c">0<br />1</td><td class="c">Both</td></tr>
@@ -328,6 +316,7 @@ footer .logo { display: inline-block; margin-top: 6px; opacity: 0.85; }
   <li>Added the <b>Debug Print</b> property. All automatic debug output is now gated behind it and silent by default; previously it printed unconditionally on every switch and every combine.</li>
   <li>Fixed a runtime error raised when a room was left with no valid inputs — <b>Allow</b> mode with an empty list, or <b>Restrict</b> mode excluding everything. The room now deselects cleanly instead. Present since 0.98.</li>
   <li>Fixed <b>Restrict Mode</b> and <b>Restrict Inputs</b> having no layout entry when <b>Input Restriction</b> was off, which left those controls unplaced.</li>
+  <li>Removed the <b>Use Custom Colours</b> and <b>Custom Colours CSV</b> properties. The room LEDs now always use the built-in palette. A design that set custom colours keeps working, but its LEDs revert to the defaults; use the separate Custom LEDs plugin to recolour them.</li>
   <li>Removed a hidden 1×1 development control that was never read. This removes a user pin; a design that wired it will show a missing pin.</li>
   <li>The plugin's internal identifier lost a <code>-compare</code> development suffix. A design placed with such a build must have the component re-placed.</li>
   <li>Source restructured into per-responsibility files and documented to the Q-SYS Library standard. Switching, combining and input-restriction behaviour is otherwise unchanged from 0.98.</li>
@@ -335,7 +324,7 @@ footer .logo { display: inline-block; margin-top: 6px; opacity: 0.85; }
 <h3>0.98</h3>
 <ul>
   <li>Per-room input restriction with Bypass, Allow and Restrict modes, with combined rooms pooling their allowed inputs.</li>
-  <li>User-definable room LED colours via a comma-separated property.</li>
+  <li>User-definable room LED colours via a comma-separated property (removed in 1.0.0.0; see the Custom LEDs plugin).</li>
   <li><b>Allow Toggle Off</b>, letting an active input be toggled back off and enabling single-input toggle-combiner use.</li>
   <li>Auto switch, following the most recently activated input per group.</li>
   <li>Select-by-name combo boxes alongside the numeric selectors.</li>
